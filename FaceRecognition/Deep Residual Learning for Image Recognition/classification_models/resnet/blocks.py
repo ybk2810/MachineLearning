@@ -15,8 +15,7 @@ def handle_block_names(stage, block):
     relu_name = name_base + 'relu'
     sc_name = name_base + 'sc'
     return conv_name, bn_name, relu_name, sc_name
-
-
+# 오리지날 resnet
 def basic_identity_block(filters, stage, block):
     """The identity block is the block that has no conv layer at shortcut.
     # Arguments
@@ -48,8 +47,7 @@ def basic_identity_block(filters, stage, block):
         return x
 
     return layer
-
-
+# 오리지날 resnet
 def basic_conv_block(filters, stage, block, strides=(2, 2)):
     """The identity block is the block that has no conv layer at shortcut.
     # Arguments
@@ -84,7 +82,6 @@ def basic_conv_block(filters, stage, block, strides=(2, 2)):
         return x
 
     return layer
-
 
 def conv_block(filters, stage, block, strides=(2, 2)):
     """The identity block is the block that has no conv layer at shortcut.
@@ -123,7 +120,6 @@ def conv_block(filters, stage, block, strides=(2, 2)):
         return x
 
     return layer
-
 
 def identity_block(filters, stage, block):
     """The identity block is the block that has no conv layer at shortcut.
