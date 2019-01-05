@@ -30,6 +30,7 @@ class FaceAging(object):
         self.tv_loss_weight = tv_loss_weight
         self.weight_decay_rate = 0.0005
 
+        # identity preserved 네트워크
     def inference(self, x, scope_name='alexnet', reuse=False):
         with tf.variable_scope(scope_name, reuse=reuse) as scope:
             # 1st Layer: Conv (w ReLu) -> Pool -> Lrn
@@ -64,7 +65,8 @@ class FaceAging(object):
             self.fc8 = fc(dropout7, 4096, self.NUM_CLASSES, relu=False, name='fc8')
 
             return scope
-
+        
+    # age_classifier 네트워크
     def face_age_alexnet(self, x, scope_name='alexnet', if_age=False, reuse=False):
         with tf.variable_scope(scope_name, reuse=reuse) as scope:
             # 1st Layer: Conv (w ReLu) -> Pool -> Lrn
@@ -117,6 +119,7 @@ class FaceAging(object):
 
             return scope
 
+    # resnet block 6개로 구성된 GAN 네트워크
     def ResnetGenerator(self, image, name, n_blocks=6, condition=None, mode='train', reuse=False):
         with tf.variable_scope(name):
             if reuse:
@@ -124,7 +127,8 @@ class FaceAging(object):
 
             if condition is not None:
                 image = tf.concat([image, condition], axis=3)
-
+                
+            # 인코더 
             x = tf.nn.relu(self.batch_norm('bn1', conv2d(image, 32, 7, 7, d_h=1, d_w=1, name='conv1'), mode=mode))
             x = tf.nn.relu(self.batch_norm('bn2', conv2d(x, 64, 3, 3,  name='conv2'), mode=mode))
 
@@ -132,11 +136,13 @@ class FaceAging(object):
                 # x = tf.concat([x, condition], axis=3)
 
             x = tf.nn.relu(self.batch_norm('bn3', conv2d(x, 128, 3, 3, name='conv3'), mode=mode))
-
+            
+            # residual blocks
             for i in range(n_blocks):
                 with tf.variable_scope('unit_%d' % i):
                     x = self.residual(x, 3, 128)
-
+                    
+            # 디코더
             x_shape = x.get_shape().as_list()
             x = deconv2d(x, [x_shape[0], x_shape[1]*2, x_shape[1]*2, 64], 3, 3, name="deconv1")
             x = tf.nn.relu(self.batch_norm('bn4', x, mode=mode))
@@ -150,6 +156,7 @@ class FaceAging(object):
 
             return tf.nn.tanh(x)
 
+    # Discriminator 네트워크
     def PatchDiscriminator(self, image, name, condition=None, mode='train', reuse=False):
         with tf.variable_scope(name):
             if reuse:
